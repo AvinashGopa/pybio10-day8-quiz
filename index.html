@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1D26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>PyBio-10 Day 8 Quiz</title>
+<meta name="description" content="PyBio-10 Day 8 quiz: Seq objects, transcription and translation, GC fraction, multi-record FASTA and FASTQ with SeqIO, SAM/BAM, VCF, CPM normalisation, log2 fold change, FDR, volcano plots and heatmaps. 30 questions, 15 minutes.">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1D26; --navy2:#1B2D38; --lime:#C6E84B; --teal:#1F7A6E; --cream:#F3F5EF;
+  --red:#B03A2E; --grey:#5D6D75; --code:#14232D; --card:#fff; --line:#dde3d8;
+  --ok-bg:#e7f4ef; --bad-bg:#fbeceb;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--cream);color:var(--navy);line-height:1.5}
+header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 14px calc(16px + env(safe-area-inset-left))}
+.hwrap{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.hwrap img{height:44px;width:auto}
+.htxt .t{font-weight:700;font-size:1.05rem}
+.htxt .s{color:var(--lime);font-size:.85rem}
+main{max-width:820px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+h1{font-size:1.5rem;margin:0 0 8px}
+h2{font-size:1.15rem;margin:0 0 10px}
+.muted{color:var(--grey)}
+label.lbl{display:block;font-weight:600;margin:16px 0 6px}
+input[type=text]{width:100%;padding:12px 14px;font-size:16px;-webkit-appearance:none;appearance:none;border:1.5px solid var(--line);border-radius:8px;font-family:inherit}
+input[type=text]:focus{outline:none;border-color:var(--teal)}
+.btn{touch-action:manipulation;-webkit-appearance:none;appearance:none;min-height:44px;display:inline-block;border:0;border-radius:8px;padding:12px 22px;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--navy);color:var(--lime)}
+.btn-primary:hover{background:var(--navy2)}
+.btn-ghost{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+.rules{margin:10px 0 0;padding-left:20px}
+.rules li{margin:4px 0}
+.err{color:var(--red);font-size:.9rem;min-height:1.2em;margin-top:6px}
+/* sticky bar */
+.bar{background:var(--navy2);color:#fff;padding:10px 16px}
+.bwrap{max-width:820px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sticky{position:-webkit-sticky;position:sticky;top:0;z-index:5}
+.timer{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:600;color:var(--lime)}
+.timer.low{color:#ff8a7a}
+.prog{font-size:.9rem}
+.pbar{height:4px;background:#2f4552}
+.pbar>div{height:100%;background:var(--lime);width:0;transition:width .2s}
+/* questions */
+.qn{font-size:.8rem;font-weight:700;color:var(--teal);letter-spacing:.04em;text-transform:uppercase}
+.qt{font-weight:600;margin:4px 0 10px;font-size:1.02rem}
+pre{background:var(--code);color:#e8f0e0;padding:12px 14px;border-radius:8px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.9rem;margin:0 0 12px;white-space:pre}
+.opt{min-height:44px;touch-action:manipulation;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer;transition:border-color .1s,background .1s}
+.opt:hover{border-color:var(--teal)}
+.opt input{margin-top:3px;accent-color:var(--teal);width:18px;height:18px;flex:0 0 auto}
+.opt.sel{border-color:var(--teal);background:#eef6f3}
+.ot{font-family:inherit;white-space:pre-wrap}
+.ot.mono{font-family:'JetBrains Mono',monospace;font-size:.92rem}
+.submit-row{text-align:center;margin-top:10px}
+/* results */
+.score{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+.stat{flex:1 1 150px;background:var(--cream);border-radius:10px;padding:14px}
+.stat .k{font-size:.8rem;color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+.stat .v{font-size:1.6rem;font-weight:700}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--lime);color:var(--navy)}
+.rv.ok{border-left:5px solid var(--teal)}
+.rv.bad{border-left:5px solid var(--red)}
+.rv.skip{border-left:5px solid var(--grey)}
+.ropt{padding:8px 12px;border-radius:8px;margin:5px 0;border:1px solid var(--line)}
+.ropt.correct{background:var(--ok-bg);border-color:var(--teal);font-weight:600}
+.ropt.wrong{background:var(--bad-bg);border-color:var(--red)}
+.ropt.wrong .ot{text-decoration:line-through}
+.tag{font-size:.75rem;font-weight:700;margin-left:6px}
+.tag.c{color:var(--teal)} .tag.w{color:var(--red)}
+.ex{font-size:.92rem;color:var(--grey);margin-top:8px}
+.filter{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.filter button{border:1.5px solid var(--navy);background:#fff;color:var(--navy);padding:6px 12px;border-radius:999px;font-weight:600;cursor:pointer;font-family:inherit}
+.filter button.on{background:var(--navy);color:var(--lime)}
+footer{text-align:center;font-size:.82rem;color:var(--grey);padding:20px 16px calc(30px + env(safe-area-inset-bottom))}
+footer a{color:var(--teal)}
+.hidden{display:none!important}
+@media print{.bar,.filter,.noprint{display:none!important} body{background:#fff} .card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><div class="hwrap"><img src="logo.png" alt="Avyagraha logo"><div class="htxt"><div class="t">PyBio-10 · Python for Life Sciences</div><div class="s">Day 8 Quiz: Biopython &amp; omics data handling</div></div></div></header>
+
+<div id="bar" class="hidden sticky"><div class="bar"><div class="bwrap"><div class="prog" id="who"></div><div class="prog"><span id="answered">0</span> / <span id="total">30</span> answered</div><div class="timer" id="timer">15:00</div></div></div><div class="pbar"><div id="pfill"></div></div></div>
+
+<main>
+  <!-- START -->
+  <section id="start">
+    <div class="card">
+      <h1>Day 8 Quiz</h1>
+      <p class="muted">Topics: Seq objects, transcription and translation, GC fraction, multi-record FASTA and FASTQ with SeqIO, SAM/BAM, VCF, CPM normalisation, log2 fold change, FDR, volcano plots and heatmaps.</p>
+      <ul class="rules">
+        <li><b>30</b> multiple-choice questions, one correct answer each.</li>
+        <li>You have <b>15 minutes</b>. The quiz submits automatically when time runs out.</li>
+        <li>Refreshing the page does not reset the timer.</li>
+        <li>Your score and the correct answers appear after you submit.</li>
+      </ul>
+      <label class="lbl" for="name">Your full name</label>
+      <input type="text" id="name" placeholder="e.g. Priya Sharma" autocomplete="name" maxlength="80">
+      <div class="err" id="err"></div>
+      <button class="btn btn-primary" id="go">Start quiz →</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="hidden">
+    <div id="qlist"></div>
+    <div class="submit-row"><button class="btn btn-primary" id="submit">Submit answers</button></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="hidden">
+    <div class="card">
+      <div id="autoNote" class="badge hidden" style="background:#ffd9d3;margin-bottom:8px">Time up: submitted automatically</div>
+      <h1 id="rname"></h1>
+      <div class="muted" id="rmeta"></div>
+      <div class="score">
+        <div class="stat"><div class="k">Score</div><div class="v" id="rscore"></div></div>
+        <div class="stat"><div class="k">Percentage</div><div class="v" id="rpct"></div></div>
+        <div class="stat"><div class="k">Time taken</div><div class="v" id="rtime"></div></div>
+      </div>
+      <p style="margin:14px 0 0"><span class="badge" id="rmsg"></span></p>
+      <div class="noprint" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="window.print()">Save / print result</button>
+        <button class="btn btn-ghost" id="again">New attempt</button>
+      </div>
+    </div>
+    <h2>Answer review</h2>
+    <div class="filter">
+      <button data-f="all" class="on">All</button>
+      <button data-f="bad">Wrong</button>
+      <button data-f="skip">Not answered</button>
+      <button data-f="ok">Correct</button>
+    </div>
+    <div id="review"></div>
+  </section>
+</main>
+
+<footer>Prepared by Dr. Avinash Gopa, Avyagraha Research and Analytics LLP (<a href="https://www.aviqlabs.com" target="_blank" rel="noopener">www.aviqlabs.com</a>)</footer>
+
+<script>
+const QUESTIONS = [{"q": "What is the output?", "code": "from Bio.Seq import Seq\ns = Seq(\"ATGGCCATT\")\nprint(s.reverse_complement())", "options": ["TACCGGTAA", "AATGGCCAT", "TTACCGGTA", "ATGGCCATT"], "answer": 1, "explain": "reverse_complement() = complement (A↔T, G↔C) and then read backwards, giving the other strand 5'→3'."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\ns = Seq(\"ATGGCCATT\")\nprint(s.complement())", "options": ["TACCGGTAA", "AATGGCCAT", "UACCGGUAA", "ATGGCCATT"], "answer": 0, "explain": "complement() only swaps A↔T and G↔C; it does not reverse the order."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\nprint(Seq(\"ATGGCC\").transcribe())", "options": ["ATGGCC", "UACCGG", "AUGGCC", "MA"], "answer": 2, "explain": "transcribe() makes mRNA from the coding strand: it simply swaps T → U."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\nprint(Seq(\"ATGGCCATTTAA\").translate())", "options": ["MAI", "MAI*", "MAIL", "ATGGCCATT"], "answer": 1, "explain": "ATG=M, GCC=A, ATT=I, TAA=stop. Biopython shows a stop codon as *."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\nprint(Seq(\"ATGGCCATTTAA\").translate(to_stop=True))", "options": ["MAI*", "MAI", "M", "Error"], "answer": 1, "explain": "to_stop=True stops translating at the first stop codon and leaves out the *."}, {"q": "Which three codons are STOP codons in the standard genetic code?", "code": null, "options": ["ATG, TAA, TAG", "TAA, TAG, TGA", "TGA, TGG, TAA", "AUG, UAA, UGA"], "answer": 1, "explain": "Start = ATG (Met). Stops = TAA, TAG, TGA."}, {"q": "Using translation table 2 (vertebrate mitochondria), what is the output?", "code": "from Bio.Seq import Seq\nprint(Seq(\"ATGTGA\").translate(table=2))", "options": ["M*", "MW", "M", "Error"], "answer": 1, "explain": "In vertebrate mitochondria TGA codes for Trp (W), not stop. Always choose the table that matches your organism or organelle."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\nfrom Bio.SeqUtils import gc_fraction\nprint(gc_fraction(Seq(\"ATGC\")))", "options": ["2", "0.5", "50", "0.25"], "answer": 1, "explain": "gc_fraction = (G + C) / length = 2 / 4 = 0.5. It returns a fraction between 0 and 1, NOT a percentage."}, {"q": "What is the output?", "code": "from Bio.Seq import Seq\nfrom Bio.SeqUtils import gc_fraction\nprint(round(gc_fraction(Seq(\"GGCCAT\")) * 100, 1))", "options": ["66.7", "0.7", "4", "33.3"], "answer": 0, "explain": "4 of the 6 bases are G or C: 4/6 = 0.667, × 100 = 66.7%."}, {"q": "A FASTA file has 5 gene records. Which function should you use to read all of them?", "code": null, "options": ["SeqIO.read()", "SeqIO.parse() in a for loop", "Seq()", "open().translate()"], "answer": 1, "explain": "SeqIO.parse() gives the records one by one. SeqIO.read() expects EXACTLY one record and gives an error otherwise."}, {"q": "This reads a small two-record FASTA. What is the output?", "code": "from io import StringIO\nfrom Bio import SeqIO\nfrom Bio.SeqUtils import gc_fraction\nfasta = \">gene1 test A\\nATGC\\n>gene2 test B\\nGGCC\\n\"\nfor rec in SeqIO.parse(StringIO(fasta), \"fasta\"):\n    print(rec.id, gc_fraction(rec.seq))", "options": ["gene1 0.5\ngene2 1.0", "gene1 1.0\ngene2 0.5", "ATGC 0.5\nGGCC 1.0", "Error"], "answer": 0, "explain": "parse() loops over every record; rec.id is the first word of the > header, and gc_fraction is computed per record."}, {"q": "In the FASTA header  >NM_000207.3 Homo sapiens insulin (INS) mRNA  what is rec.id?", "code": null, "options": ["NM_000207", "NM_000207.3", "Homo sapiens insulin (INS) mRNA", ">NM_000207.3"], "answer": 1, "explain": "rec.id is the first word after > (accession.version). The rest of the line is rec.description."}, {"q": "A FASTQ record has 4 lines. Which line holds the base QUALITY scores?", "code": null, "options": ["Line 1 (starts with @)", "Line 2", "Line 3 (+)", "Line 4"], "answer": 3, "explain": "Line 1 = @ID, line 2 = bases, line 3 = + separator, line 4 = one quality character per base."}, {"q": "A base has Phred quality Q = 30. What is the chance the base call is wrong?", "code": null, "options": ["1 in 10", "1 in 100", "1 in 1 000", "1 in 10 000"], "answer": 2, "explain": "Q = −10·log10(P). Q10 = 1 in 10, Q20 = 1 in 100, Q30 = 1 in 1 000 (99.9% accurate)."}, {"q": "The quality character is 'I'. What is its Phred score?", "code": "print(ord(\"I\") - 33)", "options": ["73", "40", "30", "33"], "answer": 1, "explain": "Phred score = ASCII code − 33. ord('I') = 73, so Q = 40."}, {"q": "Biopython reads a one-read FASTQ. What is the output?", "code": "from io import StringIO\nfrom Bio import SeqIO\nfq = \"@read_1\\nACGT\\n+\\nII5+\\n\"\nfor r in SeqIO.parse(StringIO(fq), \"fastq\"):\n    print(r.letter_annotations[\"phred_quality\"])", "options": ["[40, 40, 20, 10]", "IIIP+", "[73, 73, 53, 43]", "ACGT"], "answer": 0, "explain": "SeqIO.parse(..., 'fastq') converts each quality character to a Phred score (ASCII − 33) in letter_annotations['phred_quality']."}, {"q": "What is the difference between SAM and BAM?", "code": null, "options": ["SAM is for DNA, BAM is for RNA", "SAM is plain text; BAM is the compressed binary version (with an index)", "BAM stores variants, SAM stores reads", "They are unrelated formats"], "answer": 1, "explain": "Both store reads aligned to a reference. BAM is compressed and indexed, so it is smaller and faster."}, {"q": "A read's CIGAR string is 36M. This means:", "code": null, "options": ["36 bases all match the reference exactly", "36 bases are aligned (each may be a match OR a mismatch)", "36 bases are missing", "The read is 36% mapped"], "answer": 1, "explain": "M means 'aligned', not 'matched'. The read_3 example still had a mismatch inside its 36M."}, {"q": "In a VCF file, a patient's genotype (GT) is 0/1. This means:", "code": null, "options": ["Homozygous reference", "Heterozygous: one reference and one alternative allele", "Homozygous alternative", "The variant failed quality"], "answer": 1, "explain": "0/0 = homozygous reference, 0/1 = heterozygous (e.g. sickle-cell carrier), 1/1 = homozygous alternative."}, {"q": "Which file is usually the LARGEST for one human sample?", "code": null, "options": ["FASTQ (raw reads)", "VCF (variants)", "Count matrix (CSV)", "Sample metadata"], "answer": 0, "explain": "Size shrinks along the pipeline: FASTQ ≫ BAM ≫ VCF / count matrix."}, {"q": "A sample ID in the metadata was typed as 'Trt_2 ' (with a space). What is the output?", "code": "print(\"Trt_2 \".strip() == \"Trt_2\")", "options": ["False", "True", "Trt_2", "Error"], "answer": 1, "explain": ".strip() removes hidden spaces, so the cleaned label now matches the matrix column 'Trt_2'."}, {"q": "Why must raw RNA-seq counts be NORMALISED before comparing samples?", "code": null, "options": ["Because counts are negative", "Because samples are sequenced to different depths (library sizes)", "Because genes have no names", "Normalisation is only needed for plots"], "answer": 1, "explain": "A sample with twice the reads gives about twice the counts for the same gene. CPM corrects for depth."}, {"q": "Gene X has 300 reads in a sample with 3 million reads in total. What is its CPM?", "code": "print(300 / 3_000_000 * 1e6)", "options": ["300.0", "100.0", "0.0001", "3.0"], "answer": 1, "explain": "CPM = count / total reads × 1 000 000 = 300 / 3 000 000 × 10⁶ = 100."}, {"q": "Why do we compute log2(CPM + 1) and not log2(CPM)?", "code": null, "options": ["+1 makes the numbers bigger", "+1 avoids log(0) for genes with zero reads", "+1 converts to percentage", "+1 removes outliers"], "answer": 1, "explain": "log(0) is undefined. The +1 is a 'pseudocount' so that zero counts give log2(1) = 0."}, {"q": "A gene has log2 fold change = −2 (treated vs control). In words:", "code": null, "options": ["2 times higher in treated", "2 times lower in treated", "4 times LOWER in treated", "No change"], "answer": 2, "explain": "log2FC = −2 means 2⁻² = 1/4, i.e. four-fold lower. (+1 = double, −1 = half.)"}, {"q": "You test 10 000 genes and NONE truly change. About how many will still have p < 0.05 by chance?", "code": "print(10000 * 0.05)", "options": ["0", "50", "500", "5 000"], "answer": 2, "explain": "10 000 × 0.05 = 500 false positives. This is the multiple-testing problem."}, {"q": "The Benjamini–Hochberg (BH) method controls the:", "code": null, "options": ["False Discovery Rate (FDR): the expected proportion of false positives among the genes you call", "Chance that every gene is correct", "Fold change of each gene", "Library size of each sample"], "answer": 0, "explain": "BH adjusts p-values so that about 5% of your significant LIST is expected to be false (padj < 0.05)."}, {"q": "A gene is usually called differentially expressed when:", "code": null, "options": ["Raw p < 0.05 only", "padj < 0.05 AND |log2FC| ≥ 1", "log2FC = 0", "CPM < 1"], "answer": 1, "explain": "padj < 0.05: the change is statistically convincing. |log2FC| ≥ 1: it is big enough (at least 2-fold) to matter."}, {"q": "In a volcano plot, what is on the x-axis and y-axis?", "code": null, "options": ["x = sample, y = gene", "x = log2 fold change, y = −log10(p-value)", "x = CPM, y = counts", "x = p-value, y = padj"], "answer": 1, "explain": "x shows the SIZE of the change; y shows the STRENGTH of evidence. Top corners = big and convincing."}, {"q": "A heatmap of the top 40 DE genes separates control and treated samples perfectly. What can you conclude?", "code": null, "options": ["It proves the genes separate the groups", "It only SHOWS the pattern; it is circular because the genes were selected by the same test", "The analysis is wrong", "No normalisation was needed"], "answer": 1, "explain": "Genes chosen because they differ will always split the groups. The heatmap shows, it does not confirm."}];
+const DURATION = 15 * 60; // seconds
+const KEY = "pybio10_d8_quiz_v1";
+const $ = id => document.getElementById(id);
+let S = null, tick = null;
+
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmt(sec){ sec=Math.max(0,Math.round(sec)); return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0"); }
+const isMono = o => /^[<'\-\d{(]|^[A-Z]{2,}$|^\S+\(|^(True|False|None|Error)$/.test(o) || /class '/.test(o);
+
+function startNew(name){
+  S = { name, start: Date.now(), order: shuffle(QUESTIONS.map((_,i)=>i)),
+        optOrder: QUESTIONS.map(q=>shuffle(q.options.map((_,i)=>i))),
+        ans: {}, done:false, end:null, auto:false };
+  save(); showQuiz();
+}
+
+function showQuiz(){
+  $("start").classList.add("hidden"); $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden"); $("bar").classList.remove("hidden");
+  $("who").textContent = S.name; $("total").textContent = QUESTIONS.length;
+  const box = $("qlist"); box.innerHTML = "";
+  S.order.forEach((qi, n) => {
+    const q = QUESTIONS[qi];
+    const card = document.createElement("div"); card.className = "card";
+    let h = `<div class="qn">Question ${n+1} of ${QUESTIONS.length}</div><div class="qt">${esc(q.q)}</div>`;
+    if (q.code) h += `<pre>${esc(q.code)}</pre>`;
+    S.optOrder[qi].forEach(oi => {
+      const o = q.options[oi], chk = S.ans[qi] === oi;
+      h += `<label class="opt${chk?" sel":""}"><input type="radio" name="q${qi}" value="${oi}"${chk?" checked":""}><span class="ot${isMono(o)?" mono":""}">${esc(o)}</span></label>`;
+    });
+    card.innerHTML = h; box.appendChild(card);
+  });
+  box.querySelectorAll("input[type=radio]").forEach(r => r.addEventListener("change", e => {
+    const qi = +e.target.name.slice(1); S.ans[qi] = +e.target.value; save();
+    e.target.closest(".card").querySelectorAll(".opt").forEach(l => l.classList.toggle("sel", l.querySelector("input").checked));
+    updateProg();
+  }));
+  updateProg(); runTimer(); window.scrollTo(0,0);
+}
+
+function updateProg(){
+  const n = Object.keys(S.ans).length;
+  $("answered").textContent = n; $("pfill").style.width = (100*n/QUESTIONS.length)+"%";
+}
+
+function runTimer(){
+  clearInterval(tick);
+  const step = () => {
+    const left = DURATION - (Date.now() - S.start)/1000;
+    $("timer").textContent = fmt(left);
+    $("timer").classList.toggle("low", left <= 60);
+    if (left <= 0) finish(true);
+  };
+  step(); tick = setInterval(step, 500);
+}
+
+function finish(auto){
+  if (S.done) return;
+  clearInterval(tick);
+  S.done = true; S.auto = !!auto; S.end = Math.min(Date.now(), S.start + DURATION*1000);
+  save(); showResult();
+}
+
+function showResult(){
+  $("start").classList.add("hidden"); $("quiz").classList.add("hidden"); $("bar").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  let correct = 0, wrong = 0, skip = 0;
+  const rv = $("review"); rv.innerHTML = "";
+  S.order.forEach((qi, n) => {
+    const q = QUESTIONS[qi], a = S.ans[qi];
+    const st = a === undefined ? "skip" : (a === q.answer ? "ok" : "bad");
+    if (st==="ok") correct++; else if (st==="bad") wrong++; else skip++;
+    const card = document.createElement("div"); card.className = "card rv " + st; card.dataset.st = st;
+    let h = `<div class="qn">Question ${n+1} · ${st==="ok"?"✔ Correct":st==="bad"?"✘ Wrong":"— Not answered"}</div><div class="qt">${esc(q.q)}</div>`;
+    if (q.code) h += `<pre>${esc(q.code)}</pre>`;
+    S.optOrder[qi].forEach(oi => {
+      const o = q.options[oi]; let cls = "ropt", tag = "";
+      if (oi === q.answer){ cls += " correct"; tag = `<span class="tag c">Correct answer</span>`; }
+      if (oi === a && a !== q.answer){ cls += " wrong"; tag = `<span class="tag w">Your answer</span>`; }
+      else if (oi === a){ tag = `<span class="tag c">Your answer ✔</span>`; }
+      h += `<div class="${cls}"><span class="${isMono(o)?"ot mono":"ot"}">${esc(o)}</span>${tag}</div>`;
+    });
+    h += `<div class="ex"><b>Why:</b> ${esc(q.explain)}</div>`;
+    card.innerHTML = h; rv.appendChild(card);
+  });
+  const total = QUESTIONS.length, pct = Math.round(100*correct/total);
+  $("rname").textContent = S.name;
+  const d = new Date(S.end);
+  $("rmeta").textContent = `Submitted ${d.toLocaleString()} · Correct ${correct} · Wrong ${wrong} · Not answered ${skip}`;
+  $("rscore").textContent = `${correct} / ${total}`;
+  $("rpct").textContent = pct + "%";
+  $("rtime").textContent = fmt((S.end - S.start)/1000);
+  $("rmsg").textContent = pct>=90?"Excellent! 🌟":pct>=75?"Very good 👏":pct>=50?"Good, revise the wrong ones":"Keep practising: review the slides and try again";
+  $("autoNote").classList.toggle("hidden", !S.auto);
+  window.scrollTo(0,0);
+}
+
+document.querySelectorAll(".filter button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filter button").forEach(x => x.classList.toggle("on", x===b));
+  const f = b.dataset.f;
+  document.querySelectorAll("#review .rv").forEach(c => c.classList.toggle("hidden", f!=="all" && c.dataset.st!==f));
+}));
+
+$("go").addEventListener("click", () => {
+  const name = $("name").value.trim().replace(/\s+/g," ");
+  if (name.length < 2){ $("err").textContent = "Please type your name to begin."; $("name").focus(); return; }
+  startNew(name);
+});
+$("name").addEventListener("keydown", e => { if (e.key === "Enter") $("go").click(); });
+$("submit").addEventListener("click", () => {
+  const left = QUESTIONS.length - Object.keys(S.ans).length;
+  if (left > 0 && !confirm(`You have ${left} unanswered question(s). Submit anyway?`)) return;
+  finish(false);
+});
+$("again").addEventListener("click", () => {
+  if (!confirm("Start a new attempt? Your current result will be cleared from this screen.")) return;
+  clear(); S = null; $("result").classList.add("hidden"); $("start").classList.remove("hidden"); $("name").value = ""; window.scrollTo(0,0);
+});
+
+// resume an attempt in progress (or show the last result) after a refresh
+(function init(){
+  const s = load();
+  if (!s || !s.order || s.order.length !== QUESTIONS.length) return;
+  S = s;
+  if (S.done) showResult();
+  else if (Date.now() - S.start >= DURATION*1000) finish(true);
+  else showQuiz();
+})();
+</script>
+</body>
+</html>
